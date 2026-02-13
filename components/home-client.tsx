@@ -93,10 +93,13 @@ export default function HomeClient() {
         if (response.ok && data.success) {
           setVideoMetadata(data.metadata);
         } else {
-          setError('Unable to load video information');
+          const msg = data?.message || 'Unable to load video information';
+          console.warn('[Preview] Server responded:', response.status, msg);
+          setError(msg);
           setVideoMetadata(null);
         }
       } catch (err) {
+        console.warn('[Preview] Request failed:', err);
         setError('Unable to load video information');
         setVideoMetadata(null);
       } finally {

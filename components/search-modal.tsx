@@ -60,10 +60,12 @@ export default function SearchModal({ isOpen, onClose, onSelectVideo }: SearchMo
       if (response.ok && data.success && data.results) {
         setSearchResults(data.results);
       } else {
-        setError(data.message || 'Failed to search videos');
+        const msg = data?.message || 'Failed to search videos';
+        console.warn('[Search] Server responded:', response.status, msg);
+        setError(msg);
       }
     } catch (err) {
-      console.error('Search error:', err);
+      console.warn('[Search] Request failed:', err);
       setError('An error occurred while searching');
     } finally {
       setIsSearching(false);

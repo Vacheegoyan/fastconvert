@@ -38,21 +38,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
   },
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: '/logo.png',
+    apple: '/logo.png',
   },
 }
 
@@ -69,7 +56,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} ${robotoMono.variable}`}>
-      <body className={`font-sans antialiased flex flex-col min-h-screen`}>
+      <body className={`font-sans antialiased flex flex-col min-h-screen`} suppressHydrationWarning>
         <Header />
         <main className="flex-1">
           {children}
@@ -78,7 +65,7 @@ export default function RootLayout({
         <Footer />
         <AdblockWarning />
         <AnalyticsProvider />
-        <Analytics />
+        {process.env.NEXT_PUBLIC_ENABLE_VERCEL_ANALYTICS === 'true' && <Analytics />}
       </body>
     </html>
   )

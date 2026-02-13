@@ -703,6 +703,77 @@
           "timestamp": 1770901868501
         }
       ]
+    },
+    {
+      "id": "session_1770911876111_fdwt1cnaj",
+      "userId": "user_1770310655163_7n1t5hmob",
+      "startTime": 1770911876111,
+      "pageViews": 2,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+      "pages": [
+        {
+          "path": "/",
+          "timestamp": 1770911876813
+        }
+      ],
+      "endTime": 1770918862937,
+      "duration": 6986
+    },
+    {
+      "id": "session_1770912882350_jfw5qtvxq",
+      "userId": "user_1770912882146_8j8ckhn0z",
+      "startTime": 1770912882350,
+      "pageViews": 2,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/2.4.31 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+      "pages": [
+        {
+          "path": "/",
+          "timestamp": 1770912882759
+        }
+      ]
+    },
+    {
+      "id": "session_1770916623335_t5c16q718",
+      "userId": "user_1770916623179_k18pkry05",
+      "startTime": 1770916623336,
+      "pageViews": 2,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+      "pages": [
+        {
+          "path": "/",
+          "timestamp": 1770916624080
+        }
+      ],
+      "endTime": 1770918862972,
+      "duration": 2239
+    },
+    {
+      "id": "session_1770968332385_1obx7zj4t",
+      "userId": "user_1770310655163_7n1t5hmob",
+      "startTime": 1770968332385,
+      "pageViews": 2,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+      "pages": [
+        {
+          "path": "/",
+          "timestamp": 1770968332598
+        }
+      ],
+      "endTime": 1770968437918,
+      "duration": 105
+    },
+    {
+      "id": "session_1770968445955_ph0jue9n3",
+      "userId": "user_1770310655163_7n1t5hmob",
+      "startTime": 1770968445955,
+      "pageViews": 2,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+      "pages": [
+        {
+          "path": "/",
+          "timestamp": 1770968446440
+        }
+      ]
     }
   ],
   "visits": [
@@ -983,6 +1054,41 @@
       "id": "visit_1770901868263_cwtg3w2x3",
       "userId": "user_1770310655163_7n1t5hmob",
       "timestamp": 1770901868263,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+      "referrer": "http://localhost:3000/"
+    },
+    {
+      "id": "visit_1770911876196_r86fexcxg",
+      "userId": "user_1770310655163_7n1t5hmob",
+      "timestamp": 1770911876196,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+      "referrer": "http://localhost:3000/"
+    },
+    {
+      "id": "visit_1770912882483_zk12wwad7",
+      "userId": "user_1770912882146_8j8ckhn0z",
+      "timestamp": 1770912882483,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/2.4.31 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+      "referrer": "http://127.0.0.1:3000/"
+    },
+    {
+      "id": "visit_1770916623638_ht40e2v6p",
+      "userId": "user_1770916623179_k18pkry05",
+      "timestamp": 1770916623638,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+      "referrer": "http://127.0.0.1:3000/"
+    },
+    {
+      "id": "visit_1770968332197_d8k0je543",
+      "userId": "user_1770310655163_7n1t5hmob",
+      "timestamp": 1770968332197,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
+      "referrer": "http://localhost:3000/"
+    },
+    {
+      "id": "visit_1770968446097_f20pks1x8",
+      "userId": "user_1770310655163_7n1t5hmob",
+      "timestamp": 1770968446097,
       "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36",
       "referrer": "http://localhost:3000/"
     }

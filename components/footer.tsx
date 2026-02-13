@@ -21,7 +21,7 @@ export default function Footer() {
           </Link>
         </nav>
         <p className="text-sm text-muted-foreground">
-          © {currentYear} fast-convertor. All rights reserved.
+          © {currentYear} fast-convert. All rights reserved.
         </p>
       </div>
     </footer>

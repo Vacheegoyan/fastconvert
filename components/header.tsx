@@ -29,11 +29,11 @@ export default function Header() {
         >
           <img
             src="/logo.png"
-            alt="fast-convertor"
+            alt="fast-convert"
             className="h-7 w-7 sm:h-10 sm:w-10 rounded-lg object-contain"
           />
           <span style={{ fontFamily: 'var(--font-rubik-storm)' }} className="tracking-widest uppercase hidden sm:inline">
-            fast-convertor
+            fast-convert
           </span>
         </Link>
 
