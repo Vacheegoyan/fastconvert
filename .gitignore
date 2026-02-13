@@ -53,3 +53,7 @@ __pycache__/
 data/*.json
 logs/
 *.log
+
+# runtime
+/data/analytics.json
+/.venv/
