@@ -42,14 +42,32 @@ Thumbs.db
 .turbo/
 .next/cache/
 
-# Project-specific (IMPORTANT)
-# Windows ffmpeg binaries must NOT be committed (Linux VPS installs ffmpeg via apt)
+# Project-specific
+# Windows ffmpeg binaries must NOT be committed (Linux VPS installs via apt)
 ffmpeg/
 downloads/
 __pycache__/
 *.pyc
 
 # local data/logs (keep only example files in repo)
-data/*.json
-logs/
+data/*.json          # բոլոր json-ները data folder-ում
+!data/example.json   # եթե ունես example ֆայլ, որը պետք է commit արվի — բացառիր
+
+# runtime / generated
+/data/analytics.json   # <--- հենց այստեղ է կարևորը — analytics.json-ը Git-ից դուրս
+/logs/
 *.log
+
+# Python virtual env
+/.venv/
+.venv/
+venv/
+ENV/
+
+# temporary files
+*.bak
+*.swp
+*.tmp
+
+# IDE / editor files
+*.code-workspace
