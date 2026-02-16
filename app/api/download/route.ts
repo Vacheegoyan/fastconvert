@@ -1,11 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
-import os from 'os';
 import { recordDownload, generateUserId } from '@/lib/analytics';
 import { rateLimit, getClientIdentifier } from '@/lib/rate-limit';
-import { withConversionSlot } from '@/lib/concurrency';
+import ytBackend from './yt-backend.js';
 
 // Cleanup old files periodically (files older than 1 hour)
 function cleanupOldFiles() {
@@ -106,86 +104,31 @@ function normalizeYoutubeUrl(url: string): string {
   return url;
 }
 
-async function runPythonScript(action: string, url: string, quality?: string): Promise<any> {
-  return new Promise((resolve, reject) => {
-    const scriptPath = path.join(process.cwd(), 'yt.py');
-    // Store prepared files inside the project to avoid OS temp encoding issues
-    const tempDir = path.join(process.cwd(), 'downloads');
-    
-    // Ensure temp directory exists
-    if (!fs.existsSync(tempDir)) {
-      fs.mkdirSync(tempDir, { recursive: true });
-    }
-    
-    // Ensure temp and final subdirectories exist
-    const tempSubDir = path.join(tempDir, 'temp');
-    const finalSubDir = path.join(tempDir, 'final');
-    if (!fs.existsSync(tempSubDir)) {
-      fs.mkdirSync(tempSubDir, { recursive: true });
-    }
-    if (!fs.existsSync(finalSubDir)) {
-      fs.mkdirSync(finalSubDir, { recursive: true });
-    }
+const downloadsDir = path.join(process.cwd(), 'downloads');
+const finalDir = path.join(downloadsDir, 'final');
+const tempDir = path.join(downloadsDir, 'temp');
 
-    const args = [scriptPath, action, url];
-    if (quality) args.push(quality);
-    args.push(tempDir);
+const PYTHON_URL = 'http://localhost:8000';
 
-    const pythonProcess = spawn('python', args, {
-      cwd: process.cwd(),
-      stdio: ['pipe', 'pipe', 'pipe'],
-      env: {
-        ...process.env,
-        PYTHONIOENCODING: 'utf-8'
-      }
-    });
+async function proxyToPython(action: string, body: Record<string, unknown>): Promise<Record<string, unknown>> {
+  const url = body.url as string;
+  console.log('Proxying to Python:', action, url);
+  const res = await fetch(`${PYTHON_URL}/${action}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      ...body,
+      output_path: downloadsDir,
+    }),
+  });
+  const data = await res.json().catch(() => ({}));
+  console.log('Python response:', data);
+  return data as Record<string, unknown>;
+}
 
-    let stdout = '';
-    let stderr = '';
-
-    pythonProcess.stdout.on('data', (data) => {
-      // Ensure proper UTF-8 encoding
-      if (Buffer.isBuffer(data)) {
-        stdout += data.toString('utf8');
-      } else {
-        stdout += data;
-      }
-    });
-
-    pythonProcess.stderr.on('data', (data) => {
-      // Ensure proper UTF-8 encoding
-      if (Buffer.isBuffer(data)) {
-        stderr += data.toString('utf8');
-      } else {
-        stderr += data;
-      }
-    });
-
-    pythonProcess.on('close', (code) => {
-      if (code === 0) {
-        try {
-          // Extract JSON from stdout (may contain progress logs before JSON)
-          const jsonMatch = stdout.match(/\{[\s\S]*"file_path"[\s\S]*\}/);
-          if (jsonMatch) {
-            const result = JSON.parse(jsonMatch[0]);
-            resolve(result);
-          } else {
-            // Try parsing the whole output as JSON
-            const result = JSON.parse(stdout.trim());
-            resolve(result);
-          }
-        } catch (e) {
-          // If not JSON, return success with message
-          resolve({ success: true, message: stdout.trim() });
-        }
-      } else {
-        reject(new Error(stderr || `Python script failed with code ${code}`));
-      }
-    });
-
-    pythonProcess.on('error', (error) => {
-      reject(error);
-    });
+function ensureDownloadDirs() {
+  [downloadsDir, tempDir, finalDir].forEach((dir) => {
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
   });
 }
 
@@ -200,7 +143,10 @@ export async function POST(request: NextRequest) {
       lastCleanup = now;
     }
 
-    const { url, quality, action, file_path, fileName, original_filename, file_name, poster_quality } = await request.json();
+    const body = await request.json();
+    const { url, quality, action, file_path, fileName, original_filename, file_name, poster_quality } = body;
+    console.log('Received body:', { url, quality, action, file_path: file_path ? '[present]' : undefined });
+    if (quality !== undefined) console.log('Received quality:', quality);
 
     // Rate limit heavy actions: 15 per minute per IP (prepare + download)
     const heavyActions = ['prepare', 'prepare_poster', 'download'];
@@ -224,21 +170,21 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // For download action, don't require URL
-    if (!url && action !== 'download') {
+    // For download (stream) and delete_file, don't require URL
+    if (!url && !['download', 'delete_file'].includes(action)) {
       return NextResponse.json(
         { success: false, message: 'URL is required' },
-        { status: 400 }
+        { status: 200 }
       );
     }
 
-    // Validate YouTube URL if URL is provided
-    if (url) {
+    // Validate YouTube URL if URL is provided (for actions that need it)
+    if (url && !['delete_file'].includes(action)) {
       const videoId = extractVideoId(url);
       if (!videoId) {
         return NextResponse.json(
           { success: false, message: 'Invalid YouTube URL' },
-          { status: 400 }
+          { status: 200 }
         );
       }
     }
@@ -246,26 +192,15 @@ export async function POST(request: NextRequest) {
     // If action is just to get metadata
     if (action === 'preview' || action === 'info') {
       try {
-        // Normalize URL (convert shorts to watch format for better compatibility)
         const normalizedUrl = normalizeYoutubeUrl(url);
-        // Use Python script to get video info directly from yt-dlp
-        const result = await runPythonScript('info', normalizedUrl);
-        
-        // Parse the JSON result from Python
-        let metadata = {};
-        if (typeof result === 'string') {
-          try {
-            metadata = JSON.parse(result);
-          } catch (e) {
-            metadata = result;
-          }
-        } else {
-          metadata = result;
+        const result = await ytBackend.getInfo(normalizedUrl);
+        if (result.success) {
+          return NextResponse.json({ success: true, metadata: result });
         }
-        
         return NextResponse.json({
-          success: true,
-          metadata,
+          success: false,
+          message: result.error || 'Unable to load video information',
+          metadata: {}
         });
       } catch (err) {
         console.log('[Download API] Info error:', err);
@@ -277,101 +212,91 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // For prepare (convert video and return file path)
+    // For prepare (convert video) - proxy to Python
     if (action === 'prepare') {
-      if (!quality) {
+      if (!url || !quality) {
         return NextResponse.json(
-          { success: false, message: 'Quality is required' },
-          { status: 400 }
+          { success: false, message: 'Missing url or quality' },
+          { status: 200 }
         );
       }
 
       try {
-        // Normalize URL (convert shorts to watch format for better compatibility)
+        ensureDownloadDirs();
         const normalizedUrl = normalizeYoutubeUrl(url);
-        const result = await withConversionSlot(() =>
-          runPythonScript('download', normalizedUrl, quality)
-        );
-        console.log('[Download API] Prepare result:', result);
-        
-        if (result && result.file_path && fs.existsSync(result.file_path)) {
-          // Use original filename from Python if available, otherwise use safe filename
-          const fileName = result.original_filename || path.basename(result.file_path);
-          
-          // Track download for analytics
+        const result = await proxyToPython('download', { url: normalizedUrl, quality });
+
+        const filePath = typeof result.file_path === 'string' ? result.file_path : '';
+        if (result.success && filePath && fs.existsSync(filePath)) {
+          const fileName = (result.original_filename as string) || path.basename(filePath);
           try {
-            const ip = request.headers.get('x-forwarded-for')?.split(',')[0] || 
-                      request.headers.get('x-real-ip') || 
+            const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+                      request.headers.get('x-real-ip') ||
                       'unknown';
             const userAgent = request.headers.get('user-agent') || undefined;
-            const country = request.headers.get('cf-ipcountry') || 
-                           request.headers.get('x-vercel-ip-country') || 
+            const country = request.headers.get('cf-ipcountry') ||
+                           request.headers.get('x-vercel-ip-country') ||
                            undefined;
             const userId = generateUserId(ip, userAgent);
             const videoId = extractVideoId(url);
-            
             recordDownload(quality, quality, videoId || undefined, userId, country);
           } catch (trackError) {
-            // Don't fail the request if tracking fails
             console.error('[Download API] Tracking error:', trackError);
           }
-          
           return NextResponse.json({
             success: true,
             message: 'Video prepared successfully',
-            file_path: result.file_path,
+            file_path: filePath,
             fileName: fileName,
-          });
-        } else {
-          return NextResponse.json({
-            success: false,
-            message: result?.message || 'Failed to prepare video',
-          }, { status: 500 });
+          }, { status: 200 });
         }
-      } catch (pythonError) {
-        console.log('[Download API] Prepare error:', pythonError);
+        return NextResponse.json({
+          success: Boolean(result.success),
+          message: (result.message as string) || 'Failed to prepare video',
+          fileName: (result.original_filename as string) ?? null,
+          original_filename: (result.original_filename as string) ?? null,
+        }, { status: 200 });
+      } catch (prepareError) {
+        console.warn('[Download API] Prepare error:', prepareError);
         return NextResponse.json(
           {
             success: false,
-            message: 'Unable to prepare video. ' + (pythonError instanceof Error ? pythonError.message : String(pythonError)),
+            message: 'Unable to prepare video. Please try again.',
           },
-          { status: 500 }
+          { status: 200 }
         );
       }
     }
 
-    // For poster prepare (download thumbnail/poster and return file path)
+    // For poster prepare - proxy to Python
     if (action === 'prepare_poster') {
       try {
-        // Normalize URL (convert shorts to watch format for better compatibility)
+        ensureDownloadDirs();
         const normalizedUrl = normalizeYoutubeUrl(url);
-        const result = await withConversionSlot(() =>
-          runPythonScript('poster', normalizedUrl, poster_quality)
-        );
+        const result = await proxyToPython('poster', {
+          url: normalizedUrl,
+          quality: poster_quality || 'high',
+        });
         console.log('[Download API] Poster prepare result:', result);
 
-        if (result && result.file_path && fs.existsSync(result.file_path)) {
-          const fileName = result.original_filename || path.basename(result.file_path);
+        if (result && result.file_path && typeof result.file_path === 'string' && fs.existsSync(result.file_path)) {
+          const fileName = (result.original_filename as string) || path.basename(result.file_path);
           return NextResponse.json({
             success: true,
             message: 'Poster prepared successfully',
             file_path: result.file_path,
             fileName: fileName,
-          });
+          }, { status: 200 });
         }
-
         return NextResponse.json(
-          { success: false, message: result?.message || 'Failed to prepare poster' },
-          { status: 500 }
+          { success: result?.success ?? false, message: (result?.message as string) || 'Failed to prepare poster' },
+          { status: 200 }
         );
-      } catch (pythonError) {
-        console.log('[Download API] Poster prepare error:', pythonError);
+      } catch (posterError) {
+        console.warn('[Download API] Poster prepare error:', posterError);
         return NextResponse.json(
-          {
-            success: false,
-            message: 'Unable to prepare poster. ' + (pythonError instanceof Error ? pythonError.message : String(pythonError)),
-          },
-          { status: 500 }
+          { success: false, message: 'Unable to prepare poster. Please try again.' },
+          { status: 200 }
         );
       }
     }
@@ -384,49 +309,12 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-
       try {
-        const downloadsDir = path.join(process.cwd(), 'downloads');
-        const tempDir = path.join(downloadsDir, 'temp');
-        const finalDir = path.join(downloadsDir, 'final');
-        
-        let deleted = false;
-        const fileName = path.basename(file_path);
-        
-        // Try to delete from final folder first (where file is moved after conversion)
-        const finalPath = path.join(finalDir, fileName);
-        if (fs.existsSync(finalPath)) {
-          fs.unlinkSync(finalPath);
-          console.log('[Download API] File deleted from final:', finalPath);
-          deleted = true;
+        const result = ytBackend.deleteFile(file_path);
+        if (result.success) {
+          return NextResponse.json({ success: true, message: 'File deleted successfully' });
         }
-        
-        // Also try to delete from temp folder (in case it's still there)
-        const tempPath = path.join(tempDir, fileName);
-        if (fs.existsSync(tempPath)) {
-          fs.unlinkSync(tempPath);
-          console.log('[Download API] File deleted from temp:', tempPath);
-          deleted = true;
-        }
-        
-        // Also try to delete from the exact path provided
-        if (fs.existsSync(file_path)) {
-          fs.unlinkSync(file_path);
-          console.log('[Download API] File deleted from path:', file_path);
-          deleted = true;
-        }
-        
-        if (deleted) {
-          return NextResponse.json({
-            success: true,
-            message: 'File deleted successfully',
-          });
-        } else {
-          return NextResponse.json({
-            success: false,
-            message: 'File not found',
-          }, { status: 404 });
-        }
+        return NextResponse.json({ success: false, message: 'File not found' }, { status: 404 });
       } catch (error) {
         console.log('[Download API] Delete error:', error);
         return NextResponse.json({
@@ -484,10 +372,6 @@ export async function POST(request: NextRequest) {
         }
 
         // Delete file after download completes with a delay
-        // This allows user to retry download if they cancelled the save dialog
-        // Delete from both temp and final folders
-        const downloadsDir = path.join(process.cwd(), 'downloads');
-        const finalDir = path.join(downloadsDir, 'final');
         const finalPath = path.join(finalDir, fileName);
         
         // Delete after 30 seconds - enough time to retry if cancelled, but not too long
@@ -526,104 +410,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // For actual download (legacy, for backward compatibility)
-    if (!quality) {
-      return NextResponse.json(
-        { success: false, message: 'Quality is required for download' },
-        { status: 400 }
-      );
-    }
-
-    try {
-      // Use Python yt.py script for download
-      const result = await withConversionSlot(() =>
-        runPythonScript('download', url, quality)
-      );
-
-      console.log('[Download API] Python result:', result);
-      
-      // Check if Python script returned a file path
-      if (result && result.file_path && typeof result.file_path === 'string' && result.file_path.length > 0) {
-        let filePath = result.file_path;
-        
-        // Convert Windows backslashes to forward slashes for consistency
-        filePath = filePath.replace(/\\/g, path.sep);
-        
-        // Convert relative path to absolute path if needed
-        if (!path.isAbsolute(filePath)) {
-          filePath = path.join(process.cwd(), filePath);
-        }
-        
-        console.log('[Download API] File path (absolute):', filePath);
-        
-        try {
-          // Check if file exists
-          if (!fs.existsSync(filePath)) {
-            console.log('[Download API] File not found at:', filePath);
-            return NextResponse.json({
-              success: false,
-              message: `File not found: ${filePath}`,
-            }, { status: 404 });
-          }
-          
-          // Read the file
-          const fileBuffer = fs.readFileSync(filePath);
-          const fileSize = fileBuffer.length;
-          const fileName = path.basename(filePath);
-
-          // Build Content-Disposition with RFC5987 encoding
-          const originalName = (result && (result.original_filename || result.fileName)) || fileName;
-          // Use ASCII-safe filename or create a generic one
-          const safeName = /[^\x00-\x7F]/.test(fileName) ? 'download' + path.extname(fileName) : fileName;
-          
-          // HTTP headers must be ASCII-only, so use RFC 5987 encoding for UTF-8 filenames
-          let contentDisposition = `attachment; filename="${safeName}"`;
-          if (originalName && originalName !== safeName) {
-            // If different from safeName, add RFC 5987 encoded version
-            contentDisposition += `; filename*=UTF-8''${encodeURIComponent(originalName)}`;
-          }
-
-          console.log('[Download API] File found:', fileName, 'Size:', fileSize);
-          console.log('[Download API] Original name:', originalName);
-          console.log('[Download API] Content-Disposition:', contentDisposition);
-
-          // Return file as downloadable response
-          return new NextResponse(fileBuffer, {
-            status: 200,
-            headers: {
-              'Content-Type': quality === 'mp3' ? 'audio/mpeg' : 'video/mp4',
-              'Content-Disposition': contentDisposition,
-              'Content-Length': fileSize.toString(),
-            },
-          });
-        } catch (readError) {
-          console.log('[Download API] File read error:', readError);
-          
-          return NextResponse.json({
-            success: false,
-            message: 'Failed to read file after download',
-            error: readError instanceof Error ? readError.message : String(readError)
-          }, { status: 500 });
-        }
-      } else {
-        console.log('[Download API] No valid file path in result:', result);
-        
-        return NextResponse.json({
-          success: false,
-          message: result?.message || 'Download failed: No file generated',
-        }, { status: 500 });
-      }
-    } catch (pythonError) {
-      console.log('[Download API] Python script error:', pythonError);
-      
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Unable to download. ' + (pythonError instanceof Error ? pythonError.message : String(pythonError)),
-        },
-        { status: 500 }
-      );
-    }
+    return NextResponse.json(
+      { success: false, message: 'Unknown action' },
+      { status: 400 }
+    );
   } catch (error) {
     console.log('[Download API] Error:', error);
     return NextResponse.json(

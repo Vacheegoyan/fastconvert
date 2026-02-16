@@ -12,6 +12,8 @@ import unicodedata
 import re
 import urllib.request
 import urllib.error
+import glob
+import time
 
 class YouTubeDownloader:
     def __init__(self):
@@ -138,14 +140,13 @@ class YouTubeDownloader:
             return None
 
     def find_downloaded_file(self, url, output_path, expected_ext):
-        """Գտնում է բեռնված ֆայլը"""
+        """Գտնում է բեռնված ֆայլը. If no exact title match, falls back to newest file with expected_ext in temp_dir."""
         try:
-            # Ստուգել թե արդյո folder-ը գոյություն ունի
             if not os.path.exists(output_path):
                 return None
             
-            # If title-based search fails, look for most recent file
             files = [f for f in os.listdir(output_path) if f.endswith(expected_ext)]
+            print(f"Searching in {output_path} for .{expected_ext}, found: {files}")
             if files:
                 latest_file = max([os.path.join(output_path, f) for f in files], key=os.path.getctime)
                 return latest_file
@@ -155,41 +156,52 @@ class YouTubeDownloader:
         
         return None
 
-    def move_to_final_folder(self, original_path, original_filename=None, output_path='.'):
+    def move_to_final_folder(self, original_path, original_filename=None, output_path='.', force_mp3=False):
         """Տեղափոխում է ֆայլը final թղթապանակ՝ պահպանելով բնօրիգինալ անունը"""
+        if original_path is None:
+            print("move_to_final_folder: original_path is None, returning unknown.mp3")
+            return None, "unknown.mp3"
+        original_path = os.path.abspath(original_path)
         if not os.path.exists(original_path):
+            sys.stderr.write(f"move_to_final_folder: original_path does not exist: {original_path}\n")
             return None, original_filename or os.path.basename(original_path)
         
+        final_path = None
         try:
-            # Ստանալ բնօրիգինալ անունը
             if not original_filename:
                 original_filename = os.path.basename(original_path)
             
-            # Որոշել final թղթապանակի ուղին
-            if output_path == '.' or output_path == self.downloads_dir.get('temp'):
-                final_dir = self.downloads_dir['final']
-            elif 'downloads' in output_path:
-                # Node.js-ից downloads ուղին է ստացվում
-                final_dir = os.path.join(output_path, 'final')
-            else:
-                final_dir = output_path
+            # Resolve final_dir and temp_dir with absolute paths
+            base = os.path.abspath(output_path) if output_path != '.' else os.path.abspath(self.downloads_dir['base'])
+            final_dir = os.path.abspath(os.path.join(base, 'final'))
+            temp_dir = os.path.abspath(os.path.join(base, 'temp'))
             
-            # Բնօրիգինալ անվով ֆայլի ուղի final-ում
-            final_path = os.path.join(final_dir, original_filename)
-            
-            # Տեղափոխել ֆայլը (պահպանելով բնօրիգինալ անունը)
             os.makedirs(final_dir, exist_ok=True)
-            shutil.move(original_path, final_path)
+            os.makedirs(temp_dir, exist_ok=True)
             
-            return final_path, original_filename
+            if force_mp3:
+                final_name = self.sanitize_filename(os.path.splitext(original_filename)[0]) + ".mp3"
+            else:
+                final_name = original_filename
+            final_path = os.path.join(final_dir, final_name)
+            print(f"Attempting move from {original_path} to {final_path}")
+            if not os.path.exists(original_path):
+                print("Source file missing before move")
+                return None, original_filename or os.path.basename(original_path)
+            shutil.move(original_path, final_path)
+            print(f"Final path resolved: {final_path}")
+            if force_mp3:
+                print(f"Final MP3 path: {final_path}")
+            return final_path, final_name if force_mp3 else original_filename
         except Exception as e:
-            import traceback
-            traceback.print_exc(file=sys.stderr)
+            sys.stderr.write(f"Move error: {str(e)}\nPath from: {original_path}\nPath to: {final_path or '(not set)'}\n")
+            sys.stderr.write(traceback.format_exc())
             return None, original_filename or os.path.basename(original_path)
 
     def download_mp3(self, url, output_path='.', quality_kbps='320'):
-        """Բեռնում է MP3 տվյալ որակով (kbps)"""
-        
+        """MP3 download — temporary simplified: always 320kbps."""
+        kbps_int = 320
+        print(f"Using kbps: {kbps_int} (CBR, fixed)")
         # Ստանալ վիդեոյի տեղեկություն (բնօրիգինալ անունը)
         video_info = self.get_video_info(url)
         if not video_info:
@@ -198,21 +210,20 @@ class YouTubeDownloader:
         original_title = video_info.get('title', 'video')
         
         # Հստահիցեք որ downloads թղթապանակների կառուցվածքը ճիշտ է
-        if output_path != '.' and 'downloads' in output_path:
-            # Node.js-ից downloads ուղին է ստացվում, ստեղծել temp/final
-            temp_dir = os.path.join(output_path, 'temp')
+        if output_path != '.' and 'downloads' in str(output_path):
+            base = os.path.normpath(os.path.abspath(output_path))
+            temp_dir = os.path.join(base, 'temp')
             os.makedirs(temp_dir, exist_ok=True)
-            self.downloads_dir['final'] = os.path.join(output_path, 'final')
+            self.downloads_dir['final'] = os.path.join(base, 'final')
             os.makedirs(self.downloads_dir['final'], exist_ok=True)
         else:
-            # Local օգտագործման դեպքում
             temp_dir = self.downloads_dir['temp']
         
-        # Ստեղծել բեռնման կարգավորումներ
-        # Sanitize the output template to avoid encoding issues
+        expected_title = self.sanitize_filename(original_title)
+        # Force output template with sanitized title so we can rename to .mp3 after
         ydl_opts = {
             'format': 'bestaudio/best',
-            'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
+            'outtmpl': os.path.join(temp_dir, f"{expected_title}.%(ext)s"),
             'quiet': True,
             'no_warnings': True,
             'noplaylist': True,
@@ -225,40 +236,79 @@ class YouTubeDownloader:
         }
         
         if self.ffmpeg_dir:
+            # preferredquality > 10 → yt-dlp uses -b:a {value}k (CBR)
             ydl_opts.update({
                 'ffmpeg_location': self.ffmpeg_dir,
                 'postprocessors': [{
                     'key': 'FFmpegExtractAudio',
                     'preferredcodec': 'mp3',
-                    'preferredquality': str(quality_kbps)
+                    'preferredquality': kbps_int,
                 }]
             })
         
         try:
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
-                # Find and return the downloaded file path
-                file_path = self.find_downloaded_file(url, temp_dir, '.mp3')
-                if file_path:
-                    # Տեղափոխել final թղթապանակ պահպանելով բնօրիգինալ անունը
-                    actual_filename = os.path.basename(file_path)
-                    final_path, _ = self.move_to_final_folder(file_path, actual_filename, output_path)
-                    if final_path:
-                        return final_path, original_title
-                    else:
-                        sys.stderr.write(f"Error: Failed to move file to final folder\n")
-                        return None
+            # Give FFmpeg time to finish writing the .mp3 file.
+            time.sleep(2)
+            temp_dir_abs = os.path.abspath(temp_dir)
+            mp3_path = os.path.join(temp_dir_abs, f"{expected_title}.mp3")
+            # Force rename any .webm/.m4a/.opus to .mp3 if FFmpegExtractAudio didn't rename
+            for ext in ['.webm', '.m4a', '.opus']:
+                candidate = os.path.join(temp_dir_abs, f"{expected_title}{ext}")
+                if os.path.isfile(candidate):
+                    try:
+                        os.rename(candidate, mp3_path)
+                        print(f"Renamed {candidate} to {mp3_path}")
+                    except OSError as e:
+                        sys.stderr.write(f"Rename failed: {e}\n")
+                    break
+            # file_path: prefer .mp3 at expected path, else newest .mp3, else fallbacks
+            if os.path.isfile(mp3_path):
+                file_path = mp3_path
+                print(f"Using MP3 at expected path: {file_path}")
+            else:
+                mp3_files = glob.glob(os.path.join(temp_dir_abs, '*.mp3'))
+                all_files = []
+                if mp3_files:
+                    file_path = max(mp3_files, key=os.path.getctime)
+                    print(f"Found newest MP3 in temp: {file_path} (created {time.ctime(os.path.getctime(file_path))})")
                 else:
-                    sys.stderr.write(f"Error: Could not find downloaded MP3 file in {temp_dir}\n")
+                    print(f"No .mp3 files found in {temp_dir_abs}. Listing all files:")
+                    all_files = os.listdir(temp_dir_abs) if os.path.exists(temp_dir_abs) else []
+                    print(all_files)
+                    file_path = None
+                if file_path is None:
+                    candidate = os.path.join(temp_dir_abs, f"{expected_title}.mp3")
+                    if os.path.isfile(candidate):
+                        file_path = candidate
+                        print(f"Found MP3 by title: {file_path}")
+                    if file_path is None:
+                        webm_files = glob.glob(os.path.join(temp_dir_abs, '*.webm'))
+                        if webm_files:
+                            file_path = max(webm_files, key=os.path.getctime)
+                            print(f"Using newest .webm as fallback: {file_path}")
+            if file_path:
+                print(f"Downloaded to: {file_path}")
+                actual_filename = os.path.basename(file_path)
+                final_path, _ = self.move_to_final_folder(file_path, actual_filename, output_path, force_mp3=True)
+                if final_path:
+                    print(f"Moved to final: {final_path}")
+                    return final_path, original_title
+                else:
+                    sys.stderr.write(f"Error: Failed to move file to final folder\n")
                     return None
+            else:
+                sys.stderr.write(f"Error: Could not find downloaded MP3 file in {temp_dir}\n")
+                return {"success": False, "message": "No MP3 file found after conversion"}
         except Exception as e:
-            import traceback
             traceback.print_exc(file=sys.stderr)
             return None
 
     def download_mp4_with_sound(self, url, resolution, output_path='.'):
-        """Բեռնում է MP4 տվյալ ռեզոլյուցիայով ապահովված ձայնով"""
-        
+        """MP4 download — temporary simplified: always 1080p (bestvideo[height<=1080]+bestaudio)."""
+        resolution = 1080
+        print(f"Using resolution: {resolution}p (fixed)")
         # Ստանալ վիդեոյի տեղեկություն (բնօրիգինալ անունը)
         video_info = self.get_video_info(url)
         if not video_info:
@@ -267,14 +317,13 @@ class YouTubeDownloader:
         original_title = video_info.get('title', 'video')
         
         # Հստահիցեք որ downloads թղթապանակների կառուցվածքը ճիշտ է
-        if output_path != '.' and 'downloads' in output_path:
-            # Node.js-ից downloads ուղին է ստացվում, ստեղծել temp/final
-            temp_dir = os.path.join(output_path, 'temp')
+        if output_path != '.' and 'downloads' in str(output_path):
+            base = os.path.normpath(os.path.abspath(output_path))
+            temp_dir = os.path.join(base, 'temp')
             os.makedirs(temp_dir, exist_ok=True)
-            self.downloads_dir['final'] = os.path.join(output_path, 'final')
+            self.downloads_dir['final'] = os.path.join(base, 'final')
             os.makedirs(self.downloads_dir['final'], exist_ok=True)
         else:
-            # Local օգտագործման դեպքում
             temp_dir = self.downloads_dir['temp']
         
         ydl_opts = {
@@ -294,32 +343,17 @@ class YouTubeDownloader:
             'concurrent_fragments': 4,  # Download fragments in parallel
         }
         
-        # Եթե FFmpeg կա, կարող ենք միավորել video և audio streams
+        # Եթե FFmpeg կա, միավորել video + audio streams (4K inclusive)
         if self.ffmpeg_dir:
-            # Optimized format string - prioritize exact match first, then fallback
-            # Reduced options for faster format selection
-            tolerance = 20
-            min_height = max(360, resolution - tolerance)
-            
-            # Simplified format priority for speed:
-            # 1. Exact resolution + best audio (any codec)
-            # 2. Close to resolution + best audio
-            # 3. Best video up to resolution + best audio
-            # 4. Already merged format as fallback
-            
+            # Միայն height<= — լավագույն տեսանյութ մինչև ընտրված ռեզոլյուցիա
             format_str = (
-                f'bestvideo[height={resolution}]+bestaudio/'  # Exact resolution + best audio
-                f'bestvideo[height<={resolution}][height>={min_height}]+bestaudio/'  # Close to resolution + best audio
-                f'bestvideo[height<={resolution}]+bestaudio/'  # Any up to resolution + best audio
-                f'best[height<={resolution}]'  # Fallback: already merged format
+                f'bestvideo[height<={resolution}]+bestaudio/'
+                f'best[height<={resolution}]'
             )
-            
             ydl_opts.update({
                 'ffmpeg_location': self.ffmpeg_dir,
                 'format': format_str,
-                # yt-dlp automatically merges video+audio when using + format
-                # The merge_output_format ensures MP4 output
-                # No need for FFmpegMerger postprocessor as yt-dlp handles it automatically
+                'merge_output_format': 'mp4',
             })
         else:
             # Without FFmpeg, try to find already merged format
@@ -391,10 +425,10 @@ class YouTubeDownloader:
         # mqdefault.jpg is medium quality (320x180)
         # default.jpg is low quality (120x90)
         base = f"https://i.ytimg.com/vi/{video_id}"
-        quality = (poster_quality or 'maxresdefault').lower()
+        # Temporary simplified: always maxresdefault (1280x720)
+        quality = 'maxresdefault'
         
-        # Build candidates list based on specific quality selection
-        # Each quality maps to a specific thumbnail size
+        # Build candidates list based on quality (fixed to maxresdefault)
         if quality == 'default':
             candidates = [f"{base}/default.jpg"]  # 120x90
         elif quality == 'mqdefault':

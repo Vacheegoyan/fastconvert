@@ -1,6 +1,6 @@
 /**
  * In-process semaphore to limit concurrent heavy operations (prepare / prepare_poster).
- * Prevents many users from spawning unlimited Python/FFmpeg processes at once.
+ * Prevents many users from spawning unlimited FFmpeg processes at once.
  *
  * Production: For multi-instance deployments, use a distributed queue (e.g. Bull + Redis).
  */

@@ -57,14 +57,14 @@ export default function HowToUse({ mode = 'mixed' }: { mode?: 'mp3' | 'mp4' | 'p
     },
     {
       icon: Music,
-      title: 'Select Audio Quality',
-      description: 'Choose your preferred MP3 quality: 128kbps, 160kbps, 192kbps, or 320kbps',
+      title: 'Convert to MP3',
+      description: 'MP3 is delivered at 320 kbps. No quality selection needed—just click Convert.',
       color: 'text-pink-500',
     },
     {
       icon: Download,
       title: 'Download MP3',
-      description: 'Click Convert, then Download to save your high-quality MP3 audio file',
+      description: 'Click Convert, then Download to save your high-quality MP3 audio file (320 kbps)',
       color: 'text-green-500',
     },
   ] : (mode === 'mp4' || mode === 'shorts' || mode === '4k') ? [
@@ -76,8 +76,8 @@ export default function HowToUse({ mode = 'mixed' }: { mode?: 'mp3' | 'mp4' | 'p
     },
     {
       icon: Video,
-      title: 'Choose Resolution',
-      description: 'Select your preferred video quality from 360p to 4K (2160p)',
+      title: 'Convert to MP4',
+      description: 'Videos are downloaded in 1080p (Full HD). No resolution selection needed—just click Convert.',
       color: 'text-purple-500',
     },
     {
@@ -95,8 +95,8 @@ export default function HowToUse({ mode = 'mixed' }: { mode?: 'mp3' | 'mp4' | 'p
     },
     {
       icon: ImageIcon,
-      title: 'Select Image Quality',
-      description: 'Choose thumbnail size: Default, Medium, High, Standard, or Maximum resolution',
+      title: 'Get Thumbnail',
+      description: 'Thumbnail is downloaded in best available resolution (up to 1280×720). No size selection needed.',
       color: 'text-indigo-500',
     },
     {
@@ -114,8 +114,8 @@ export default function HowToUse({ mode = 'mixed' }: { mode?: 'mp3' | 'mp4' | 'p
     },
     {
       icon: PlayCircle,
-      title: 'Choose Format & Quality',
-      description: 'Select MP3 for audio or choose video resolution (360p to 1080p)',
+      title: 'Choose Format',
+      description: 'Once the video is detected, select MP3 (audio, 320 kbps) or MP4 (video, 1080p)',
       color: 'text-purple-500',
     },
     {
@@ -232,7 +232,7 @@ export default function HowToUse({ mode = 'mixed' }: { mode?: 'mp3' | 'mp4' | 'p
                   <>
                     <li className="flex items-start gap-2.5">
                       <span className="text-accent mt-0.5 flex-shrink-0">•</span>
-                      <span>Higher bitrate (320kbps) provides better audio quality but larger file size</span>
+                      <span>MP3 is delivered at 320 kbps for high-quality audio</span>
                     </li>
                     <li className="flex items-start gap-2.5">
                       <span className="text-accent mt-0.5 flex-shrink-0">•</span>
@@ -248,7 +248,7 @@ export default function HowToUse({ mode = 'mixed' }: { mode?: 'mp3' | 'mp4' | 'p
                   <>
                     <li className="flex items-start gap-2.5">
                       <span className="text-accent mt-0.5 flex-shrink-0">•</span>
-                      <span>Higher resolutions provide better quality but take longer to download</span>
+                      <span>Videos are downloaded in 1080p (Full HD) for high quality</span>
                     </li>
                     <li className="flex items-start gap-2.5">
                       <span className="text-accent mt-0.5 flex-shrink-0">•</span>
@@ -264,7 +264,7 @@ export default function HowToUse({ mode = 'mixed' }: { mode?: 'mp3' | 'mp4' | 'p
                   <>
                     <li className="flex items-start gap-2.5">
                       <span className="text-accent mt-0.5 flex-shrink-0">•</span>
-                      <span>Maximum resolution provides the best quality thumbnail (1280x720+)</span>
+                      <span>Thumbnails are downloaded in best available resolution (up to 1280×720)</span>
                     </li>
                     <li className="flex items-start gap-2.5">
                       <span className="text-accent mt-0.5 flex-shrink-0">•</span>
@@ -284,7 +284,7 @@ export default function HowToUse({ mode = 'mixed' }: { mode?: 'mp3' | 'mp4' | 'p
                     </li>
                     <li className="flex items-start gap-2.5">
                       <span className="text-accent mt-0.5 flex-shrink-0">•</span>
-                      <span>Video downloads support multiple resolutions up to 1080p</span>
+                      <span>Video downloads are in 1080p; MP3 is 320 kbps</span>
                     </li>
                     <li className="flex items-start gap-2.5">
                       <span className="text-accent mt-0.5 flex-shrink-0">•</span>

@@ -18,7 +18,7 @@ const FAQ_ITEMS = [
   {
     question: 'How do I convert a YouTube video to MP3 or MP4?',
     answer:
-      'Paste the YouTube video link in the input field, choose your preferred format (MP3 or MP4) and quality (e.g. 720p, 1080p for video, or bitrate for audio), then click Convert. When the file is ready, click Download to save it to your device.',
+      'Paste the YouTube video link in the input field. Once the video is detected, choose your format (MP3 or MP4), then click Convert. When the file is ready, click Download to save it to your device. MP3 is 320 kbps and MP4 is 1080p.',
   },
   {
     question: 'Is the service free?',
@@ -28,7 +28,7 @@ const FAQ_ITEMS = [
   {
     question: 'What formats and qualities are supported?',
     answer:
-      'For audio we support MP3 at various bitrates (e.g. 128–320 kbps). For video we support MP4 at resolutions such as 360p, 480p, 720p, 1080p, and 4K when available. We also offer a thumbnail downloader and Shorts downloader. Available options depend on what the source video provides.',
+      'For audio we support MP3 at 320 kbps. For video we support MP4 at 1080p. We also offer a thumbnail downloader (best available resolution) and a Shorts downloader (1080p). The 4K page is coming soon.',
   },
   {
     question: 'Do you store my data or the videos I convert?',
@@ -43,7 +43,7 @@ const FAQ_ITEMS = [
   {
     question: 'Can I download YouTube Shorts or 4K videos?',
     answer:
-      'Yes. Use the Shorts downloader page for vertical Shorts videos and the 4K page for videos that offer 2160p. Not every video has 4K; the tool will show only the resolutions available for the video you enter.',
+      'Yes. Use the Shorts downloader page for vertical Shorts videos (1080p). The 4K page is coming soon; for now use the MP4 downloader for 1080p.',
   },
   {
     question: 'Is it legal to use this tool?',

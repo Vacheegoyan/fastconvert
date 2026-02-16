@@ -20,7 +20,7 @@ export default function ShortsPage() {
         url={canonicalUrl('/shorts')}
       />
       <BreadcrumbJsonLd items={[{ name: 'Home', path: '/' }, { name: 'Shorts Downloader', path: '/shorts' }]} />
-      <Converter defaultQuality="720p" showQualitySelector={true} mode="shorts" />
+      <Converter mode="shorts" />
       <SeoContent slug="shorts" />
     </>
   );

@@ -7,7 +7,7 @@ import SeoContent from '@/components/seo-content';
 export const metadata: Metadata = {
   title: 'YouTube Video Converter – Download MP3 & MP4 Online',
   description:
-    'Convert YouTube videos to MP3 or MP4 online. Choose format and quality. Personal use only. Users are responsible for complying with local copyright laws.',
+    'Convert YouTube videos to MP3 or MP4 online. Choose format (MP3 or MP4), then download. Personal use only. Users are responsible for complying with local copyright laws.',
   alternates: { canonical: canonicalUrl('/') },
 };
 

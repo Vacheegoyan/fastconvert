@@ -7,7 +7,7 @@ import SearchModal from '@/components/search-modal';
 import StatisticsSection from '@/components/statistics-section';
 import HowToUse from '@/components/how-to-use';
 
-type Quality = 'mp3' | '360p' | '480p' | '720p' | '1080p';
+type Format = 'mp3' | 'mp4';
 
 interface VideoMetadata {
   title?: string;
@@ -25,7 +25,7 @@ interface DownloadResult {
 
 export default function HomeClient() {
   const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [quality, setQuality] = useState<Quality>('mp3');
+  const [format, setFormat] = useState<Format | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [error, setError] = useState('');
@@ -46,6 +46,7 @@ export default function HomeClient() {
     setError('');
     setVideoMetadata(null);
     setDownloadResult(null);
+    setFormat(null);
   };
 
   const handleSearchModalSelect = (url: string) => {
@@ -53,6 +54,7 @@ export default function HomeClient() {
     setError('');
     setVideoMetadata(null);
     setDownloadResult(null);
+    setFormat(null);
   };
 
   const handleClearUrl = () => {
@@ -60,6 +62,7 @@ export default function HomeClient() {
     setError('');
     setVideoMetadata(null);
     setDownloadResult(null);
+    setFormat(null);
   };
 
   const handlePasteUrl = async () => {
@@ -122,12 +125,20 @@ export default function HomeClient() {
       setError('Please enter a valid YouTube URL');
       return;
     }
+    if (format === null) {
+      setError('Please select MP3 or MP4');
+      return;
+    }
     setIsLoading(true);
     try {
       const response = await fetch('/api/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: youtubeUrl, quality, action: 'prepare' }),
+        body: JSON.stringify({
+          url: youtubeUrl,
+          quality: format === 'mp3' ? 'mp3-320' : '1080p',
+          action: 'prepare',
+        }),
       });
       const data = await response.json();
       if (!response.ok) {
@@ -229,7 +240,7 @@ export default function HomeClient() {
               </h1>
             </div>
             <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
-              Paste a YouTube video URL to convert it to MP3 audio or MP4 video. Choose format and quality, then download for personal use.
+              Paste a YouTube video URL to convert it to MP3 audio or MP4 video. Choose format, then download for personal use.
             </p>
           </div>
 
@@ -288,34 +299,37 @@ export default function HomeClient() {
               </div>
             )}
 
-            <div className="space-y-4">
-              <label className="block text-sm font-semibold">Select Quality</label>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                {[
-                  { value: 'mp3' as Quality, label: 'MP3', icon: Music, description: 'Audio' },
-                  { value: '360p' as Quality, label: '360p', icon: Video, description: 'SD' },
-                  { value: '480p' as Quality, label: '480p', icon: Video, description: 'SD' },
-                  { value: '720p' as Quality, label: '720p', icon: Video, description: 'HD' },
-                  { value: '1080p' as Quality, label: '1080p', icon: Video, description: 'Full HD' },
-                ].map((option) => {
-                  const Icon = option.icon;
-                  return (
-                    <button
-                      key={option.value}
-                      onClick={() => setQuality(option.value)}
-                      disabled={!videoMetadata}
-                      className={`relative flex flex-col items-center gap-1 rounded-lg border-2 p-3 transition-all text-center cursor-pointer ${
-                        quality === option.value ? 'border-accent bg-accent/15' : 'border-border bg-background hover:border-accent/50'
-                      } ${!videoMetadata ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    >
-                      <Icon className="h-5 w-5" />
-                      <span className="text-xs font-semibold">{option.label}</span>
-                      <span className="text-[10px] text-muted-foreground">{option.description}</span>
-                    </button>
-                  );
-                })}
+            {videoMetadata && (
+              <div className="space-y-4">
+                <label className="block text-sm font-semibold">Select format</label>
+                <p className="text-xs text-muted-foreground">Choose how you want to download this video.</p>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { value: 'mp3' as Format, label: 'MP3', icon: Music, description: 'Audio (320 kbps)' },
+                    { value: 'mp4' as Format, label: 'MP4', icon: Video, description: 'Video (1080p)' },
+                  ].map((option) => {
+                    const Icon = option.icon;
+                    const isSelected = format === option.value;
+                    return (
+                      <button
+                        key={option.value}
+                        onClick={() => setFormat(option.value)}
+                        type="button"
+                        className={`relative flex flex-col items-center gap-1 rounded-xl border-2 p-4 transition-all text-center cursor-pointer ${
+                          isSelected
+                            ? 'border-primary bg-primary/20 ring-2 ring-primary/50 ring-offset-2 ring-offset-card'
+                            : 'border-border bg-background hover:border-primary/50 hover:bg-muted/30'
+                        }`}
+                      >
+                        <Icon className={`h-6 w-6 ${isSelected ? 'text-primary' : ''}`} />
+                        <span className={`text-sm font-semibold ${isSelected ? 'text-primary' : ''}`}>{option.label}</span>
+                        <span className="text-xs text-muted-foreground">{option.description}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             {error && (
               <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-4 flex items-start gap-2">
@@ -346,7 +360,7 @@ export default function HomeClient() {
             <div className="flex gap-3">
               <button
                 onClick={handleConvert}
-                disabled={isLoading || !videoMetadata}
+                disabled={isLoading || !videoMetadata || format === null}
                 className="flex-1 rounded-lg bg-accent px-6 py-3 font-semibold text-accent-foreground transition-all hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
               >
                 {isLoading ? (

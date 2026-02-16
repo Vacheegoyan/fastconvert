@@ -8,8 +8,6 @@ import SearchModal from '@/components/search-modal';
 import StatisticsSection from '@/components/statistics-section';
 import HowToUse from '@/components/how-to-use';
 
-type Quality = 'mp3' | 'mp3-128' | 'mp3-160' | 'mp3-192' | 'mp3-320' | '360p' | '480p' | '720p' | '1080p' | '1440p' | '2160p' | 'poster-default' | 'poster-mqdefault' | 'poster-hqdefault' | 'poster-sddefault' | 'poster-maxresdefault';
-
 type ConverterMode = 'mixed' | 'mp3' | 'mp4' | 'poster' | 'shorts' | '4k';
 
 interface VideoMetadata {
@@ -27,18 +25,14 @@ interface DownloadResult {
 }
 
 interface ConverterProps {
-  defaultQuality: Quality;
-  showQualitySelector?: boolean;
   mode?: ConverterMode;
 }
 
+// Simplified: no quality selection — backend uses fixed defaults (MP3 320kbps, MP4 1080p, poster maxresdefault)
 export default function Converter({
-  defaultQuality,
-  showQualitySelector = true,
   mode = 'mixed',
 }: ConverterProps) {
   const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [quality, setQuality] = useState<Quality>(defaultQuality);
   const [isLoading, setIsLoading] = useState(false);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [error, setError] = useState('');
@@ -189,7 +183,7 @@ export default function Converter({
       }
     };
   }, [preparedFile, fileTimeout]);
-  
+
   // Note: Activity tracking removed - files are managed by:
   // 1. URL clear/change - deletes file immediately
   // 2. Download - deletes file after 30 seconds
@@ -225,6 +219,12 @@ export default function Converter({
       return;
     }
 
+    // 4K not available yet
+    if (mode === '4k') {
+      setError('4K - Coming Soon');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -233,14 +233,12 @@ export default function Converter({
           ? 'prepare_poster'
           : 'prepare';
 
-      const poster_quality =
-        mode === 'poster'
-          ? (quality === 'poster-maxresdefault' ? 'maxresdefault' :
-             quality === 'poster-sddefault' ? 'sddefault' :
-             quality === 'poster-hqdefault' ? 'hqdefault' :
-             quality === 'poster-mqdefault' ? 'mqdefault' :
-             quality === 'poster-default' ? 'default' : 'maxresdefault')
-          : undefined;
+      // Hardcoded defaults: MP3 320kbps, MP4 1080p, poster maxresdefault (backend also enforces these)
+      const quality =
+        mode === 'mp3' ? 'mp3-320' :
+        mode === 'mp4' || mode === 'shorts' ? '1080p' :
+        mode === 'poster' ? undefined : '1080p';
+      const poster_quality = mode === 'poster' ? 'maxresdefault' : undefined;
 
       const response = await fetch('/api/download', {
         method: 'POST',
@@ -433,9 +431,9 @@ export default function Converter({
             </div>
             <p className="text-sm sm:text-base text-muted-foreground max-w-lg mx-auto leading-relaxed">
               {mode === 'mp3' && 'Extract MP3 audio from YouTube videos in high quality.'}
-              {mode === 'mp4' && 'Download YouTube videos as MP4 in the best available resolution.'}
-              {mode === 'poster' && 'Download the video thumbnail image in several sizes.'}
-              {mode === 'shorts' && 'Download YouTube Shorts videos as MP4 in the best available resolution.'}
+              {mode === 'mp4' && 'Download YouTube videos as MP4 in 1080p (Full HD).'}
+              {mode === 'poster' && 'Download the video thumbnail in best resolution (up to 1280×720).'}
+              {mode === 'shorts' && 'Download YouTube Shorts as MP4 in 1080p.'}
               {mode === '4k' && 'Download YouTube videos in 4K (2160p) when available.'}
               {mode === 'mixed' && 'Download YouTube videos and extract MP3 audio in high quality. Fast, safe, and free.'}
             </p>
@@ -530,167 +528,11 @@ export default function Converter({
               </div>
             )}
 
-            {/* Quality Selection */}
-            {showQualitySelector && (
-              <div className="space-y-4">
-                <label className="block text-sm font-semibold">
-                  {mode === 'mp3' && 'Select Quality mp3'}
-                  {mode === 'mp4' && 'Select Quality mp4'}
-                  {mode === 'shorts' && 'Select Quality shorts'}
-                  {mode === '4k' && 'Select Quality'}
-                  {mode === 'poster' && 'Select Quality poster'}
-                  {mode === 'mixed' && 'Select Quality'}
-                </label>
-
-                {/* MP3-only quality selector */}
-                {mode === 'mp3' && (
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                    {[
-                      { value: 'mp3-128' as Quality, label: '128 kbps', description: 'Standard' },
-                      { value: 'mp3-160' as Quality, label: '160 kbps', description: 'Good' },
-                      { value: 'mp3-192' as Quality, label: '192 kbps', description: 'High' },
-                      { value: 'mp3-320' as Quality, label: '320 kbps', description: 'Best' },
-                    ].map((option) => (
-                      <button
-                        key={option.value}
-                        onClick={() => setQuality(option.value)}
-                        disabled={!videoMetadata}
-                        className={`relative flex flex-col items-center gap-1 rounded-lg border-2 p-3 transition-all text-center cursor-pointer ${
-                          quality === option.value
-                            ? 'border-accent bg-accent/15'
-                            : 'border-border bg-background hover:border-accent/50'
-                        } ${!videoMetadata ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        <Music className="h-5 w-5" />
-                        <span className="text-xs font-semibold">{option.label}</span>
-                        <span className="text-[10px] text-muted-foreground">{option.description}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* MP4-only quality selector, all available resolutions from 360p to 4K */}
-                {(mode === 'mp4' || mode === 'shorts' || mode === '4k') && (
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:grid-cols-6">
-                    {(() => {
-                      // All standard resolutions from 360p to 4K
-                      const standardResolutions: Quality[] = ['360p', '480p', '720p', '1080p', '1440p', '2160p'];
-                      const available = videoMetadata?.resolutions;
-
-                      // If we have metadata with available resolutions, filter to show only available ones
-                      // Otherwise, show all standard resolutions from 360p to 4K
-                      const options = standardResolutions.filter((q) => {
-                        const numeric = parseInt(q.replace('p', ''), 10);
-                        if (!available || available.length === 0) {
-                          // If we don't have metadata, show all standard resolutions from 360p to 4K
-                          return numeric >= 360 && numeric <= 2160;
-                        }
-                        // Check if this resolution is available (with 20px tolerance for better matching)
-                        const hasThis = available.some((r) => Math.abs(r - numeric) <= 20);
-                        return hasThis;
-                      });
-
-                      // If no options found but we have metadata, show all standard resolutions as fallback
-                      const finalOptions = options.length > 0 ? options : standardResolutions;
-
-                      return finalOptions.map((value) => {
-                        const numeric = parseInt(value.replace('p', ''), 10);
-                        let description = 'Low';
-                        if (numeric >= 2160) {
-                          description = '4K';
-                        } else if (numeric >= 1440) {
-                          description = '2K';
-                        } else if (numeric >= 1080) {
-                          description = 'Full HD';
-                        } else if (numeric >= 720) {
-                          description = 'HD';
-                        } else if (numeric >= 480) {
-                          description = 'SD';
-                        } else if (numeric >= 360) {
-                          description = 'SD';
-                        } else {
-                          description = 'Low';
-                        }
-
-                        return (
-                          <button
-                            key={value}
-                            onClick={() => setQuality(value)}
-                            disabled={!videoMetadata}
-                            className={`relative flex flex-col items-center gap-1 rounded-lg border-2 p-3 transition-all text-center cursor-pointer ${
-                              quality === value
-                                ? 'border-accent bg-accent/15'
-                                : 'border-border bg-background hover:border-accent/50'
-                            } ${!videoMetadata ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          >
-                            <Video className="h-5 w-5" />
-                            <span className="text-xs font-semibold">{value}</span>
-                            <span className="text-[10px] text-muted-foreground">{description}</span>
-                          </button>
-                        );
-                      });
-                    })()}
-                  </div>
-                )}
-
-                {/* Poster quality selector: all available thumbnail sizes */}
-                {mode === 'poster' && (
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                    {[
-                      { key: 'default', label: 'Default', description: '120x90', qualityValue: 'poster-default' as Quality },
-                      { key: 'mqdefault', label: 'Medium', description: '320x180', qualityValue: 'poster-mqdefault' as Quality },
-                      { key: 'hqdefault', label: 'High', description: '480x360', qualityValue: 'poster-hqdefault' as Quality },
-                      { key: 'sddefault', label: 'Standard', description: '640x480', qualityValue: 'poster-sddefault' as Quality },
-                      { key: 'maxresdefault', label: 'Maximum', description: '1280x720+', qualityValue: 'poster-maxresdefault' as Quality },
-                    ].map((option) => (
-                      <button
-                        key={option.key}
-                        onClick={() => setQuality(option.qualityValue)}
-                        disabled={!videoMetadata}
-                        className={`relative flex flex-col items-center gap-1 rounded-lg border-2 p-3 transition-all text-center cursor-pointer ${
-                          quality === option.qualityValue
-                            ? 'border-accent bg-accent/15'
-                            : 'border-border bg-background hover:border-accent/50'
-                        } ${!videoMetadata ? 'opacity-50 cursor-not-allowed' : ''}`}
-                      >
-                        <Image className="h-5 w-5" />
-                        <span className="text-xs font-semibold">{option.label}</span>
-                        <span className="text-[10px] text-muted-foreground">{option.description}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Mixed selector – used on the main page if needed */}
-                {mode === 'mixed' && (
-                  <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-                    {[
-                      { value: 'mp3' as Quality, label: 'MP3', icon: Music, description: 'Audio' },
-                      { value: '360p' as Quality, label: '360p', icon: Video, description: 'SD' },
-                      { value: '480p' as Quality, label: '480p', icon: Video, description: 'SD' },
-                      { value: '720p' as Quality, label: '720p', icon: Video, description: 'HD' },
-                      { value: '1080p' as Quality, label: '1080p', icon: Video, description: 'Full HD' },
-                    ].map((option) => {
-                      const Icon = option.icon;
-                      return (
-                        <button
-                          key={option.value}
-                          onClick={() => setQuality(option.value)}
-                          disabled={!videoMetadata}
-                          className={`relative flex flex-col items-center gap-1 rounded-lg border-2 p-3 transition-all text-center cursor-pointer ${
-                            quality === option.value
-                              ? 'border-accent bg-accent/15'
-                              : 'border-border bg-background hover:border-accent/50'
-                          } ${!videoMetadata ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        >
-                          <Icon className="h-5 w-5" />
-                          <span className="text-xs font-semibold">{option.label}</span>
-                          <span className="text-[10px] text-muted-foreground">{option.description}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+            {/* 4K - Coming Soon (no quality selection on any page) */}
+            {mode === '4k' && (
+              <div className="rounded-lg border border-primary/30 bg-primary/10 p-4 text-center">
+                <p className="text-sm font-medium text-primary">4K - Coming Soon</p>
+                <p className="text-xs text-muted-foreground mt-1">Ultra HD downloads will be available in a future update.</p>
               </div>
             )}
 
@@ -736,7 +578,7 @@ export default function Converter({
             <div className="flex gap-3">
               <button
                 onClick={handleConvert}
-                disabled={isLoading || !videoMetadata}
+                disabled={isLoading || !videoMetadata || mode === '4k'}
                 className="flex-1 rounded-lg bg-accent px-6 py-3 font-semibold text-accent-foreground transition-all hover:bg-accent/90 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer flex items-center justify-center gap-2"
               >
                 {isLoading ? (

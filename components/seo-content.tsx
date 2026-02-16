@@ -38,27 +38,27 @@ function HomeContent() {
         What This Tool Does
       </h2>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        This online tool lets you paste a YouTube video link and obtain an audio file (MP3) or a video file (MP4) for personal use. You choose the format and quality; the conversion runs in the browser and on our servers. No software installation is required.
+        This online tool lets you paste a YouTube video link and obtain an audio file (MP3) or a video file (MP4) for personal use. You choose the format (MP3 or MP4); the conversion runs in the browser and on our servers. No software installation is required.
       </p>
 
       <h3 className="text-xl font-semibold mt-6 mb-3">Supported Output Formats</h3>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        You can request MP3 audio at several bitrates or MP4 video at common resolutions. The options shown depend on what the source video provides. Not every video offers every resolution; the tool will list what is available after you enter the URL.
+        You can request MP3 audio (320 kbps) or MP4 video (1080p). After you paste the URL and the video is detected, you select either MP3 or MP4 and start the conversion. The tool uses fixed high quality for both formats.
       </p>
 
-      <h3 className="text-xl font-semibold mt-6 mb-3">Quality Options</h3>
+      <h3 className="text-xl font-semibold mt-6 mb-3">Output Quality</h3>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        For audio, higher bitrates generally mean better sound quality and larger file sizes. For video, higher resolutions (e.g. 720p, 1080p) give sharper picture but larger files and sometimes longer processing. You can pick the balance that fits your device and storage.
+        MP3 is delivered at 320 kbps and MP4 at 1080p (Full HD) for a consistent, high-quality result. When the file is ready, you download it to your device. Files are temporarily stored on our side only long enough to complete the download.
       </p>
 
       <h3 className="text-xl font-semibold mt-6 mb-3">How the Process Works</h3>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        After you paste a valid YouTube URL, the tool fetches information about the video. You then select the desired format and quality and start the conversion. When it is ready, you download the file to your device. Files are temporarily stored on our side only long enough to complete the download.
+        After you paste a valid YouTube URL, the tool fetches information about the video. Once the video is detected, you select the desired format (MP3 or MP4) and start the conversion. When it is ready, you download the file to your device.
       </p>
 
       <h3 className="text-xl font-semibold mt-6 mb-3">Related Tools</h3>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        If you only need audio, use the <Link href="/mp3" className="text-primary underline underline-offset-2 hover:no-underline">MP3 converter</Link> for a focused workflow. For video, the <Link href="/mp4" className="text-primary underline underline-offset-2 hover:no-underline">MP4 tool</Link> supports resolutions from standard definition up to Full HD. You can also <Link href="/poster" className="text-primary underline underline-offset-2 hover:no-underline">download thumbnails</Link> from videos, or grab <Link href="/shorts" className="text-primary underline underline-offset-2 hover:no-underline">Shorts</Link> and <Link href="/4k" className="text-primary underline underline-offset-2 hover:no-underline">4K</Link> where available.
+        If you only need audio, use the <Link href="/mp3" className="text-primary underline underline-offset-2 hover:no-underline">MP3 converter</Link> for a focused workflow. For video, the <Link href="/mp4" className="text-primary underline underline-offset-2 hover:no-underline">MP4 tool</Link> downloads in 1080p. You can also <Link href="/poster" className="text-primary underline underline-offset-2 hover:no-underline">download thumbnails</Link> from videos, or grab <Link href="/shorts" className="text-primary underline underline-offset-2 hover:no-underline">Shorts</Link>. The <Link href="/4k" className="text-primary underline underline-offset-2 hover:no-underline">4K</Link> page is coming soon.
       </p>
 
       <h3 className="text-xl font-semibold mt-6 mb-3">Legal and Responsible Use</h3>
@@ -76,17 +76,17 @@ function MP3Content() {
         About the MP3 Converter
       </h2>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        This tool extracts audio from a YouTube video and saves it as an MP3 file. You paste the video URL, choose a bitrate, and receive an audio file suitable for personal listening on your devices.
+        This tool extracts audio from a YouTube video and saves it as an MP3 file. You paste the video URL and receive a high-quality audio file (320 kbps) suitable for personal listening on your devices.
       </p>
 
-      <h3 className="text-xl font-semibold mt-6 mb-3">Bitrate Options</h3>
+      <h3 className="text-xl font-semibold mt-6 mb-3">Output Quality</h3>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        We offer 128, 160, 192, and 320 kbps. 128 kbps is adequate for speech and casual listening and keeps file size smaller. 160 and 192 kbps are common choices for music when you want a balance of quality and size. 320 kbps is the highest option and is suitable when you want the best fidelity from the source; files will be larger.
+        MP3 is delivered at 320 kbps for consistent, high-quality audio. The source video’s own audio quality remains the upper limit; 320 kbps preserves that quality. Files are suitable for music, podcasts, and voice.
       </p>
 
       <h3 className="text-xl font-semibold mt-6 mb-3">Audio Quality in Practice</h3>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        The perceived difference between bitrates depends on your headphones or speakers and the type of content. For podcasts or voice, 128 kbps is often sufficient. For music with a wide frequency range, 192 or 320 kbps may sound noticeably better on good equipment. The source video’s own audio quality remains the upper limit; higher bitrates preserve that quality rather than add new detail.
+        ​320 kbps is a high bitrate that works well for music and speech on good headphones or speakers. No format or bitrate selection is required—you paste the URL, convert, and download.
       </p>
 
       <h3 className="text-xl font-semibold mt-6 mb-3">Personal Use Only</h3>
@@ -109,22 +109,17 @@ function MP4Content() {
         About the MP4 Video Downloader
       </h2>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        This tool lets you download a YouTube video as an MP4 file. You enter the video URL, pick a resolution (e.g. 360p, 480p, 720p, 1080p), and download the resulting file. The format is widely supported on phones, tablets, computers, and media players.
+        This tool lets you download a YouTube video as an MP4 file. You enter the video URL and download the resulting file in 1080p (Full HD). The format is widely supported on phones, tablets, computers, and media players.
       </p>
 
-      <h3 className="text-xl font-semibold mt-6 mb-3">Resolution Options</h3>
+      <h3 className="text-xl font-semibold mt-6 mb-3">Output Resolution</h3>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        Common options include 360p and 480p (standard definition), 720p (HD), and 1080p (Full HD). The list of available resolutions depends on what the uploader and YouTube provide for that video. Not every video has every resolution; the tool shows what is available after you paste the link.
+        Videos are downloaded in 1080p (Full HD) for consistent high quality. No resolution selection is required—you paste the link, convert, and download.
       </p>
 
       <h3 className="text-xl font-semibold mt-6 mb-3">Video Compatibility</h3>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        MP4 is a standard container that works on most devices and operating systems. You can play the file in built-in players, VLC, or other software. Higher resolutions look better on larger screens but produce larger files and may take longer to process and download.
-      </p>
-
-      <h3 className="text-xl font-semibold mt-6 mb-3">Playback on Different Devices</h3>
-      <p className="text-muted-foreground leading-relaxed mb-4">
-        On small screens, 720p is often enough. For a TV or monitor, 1080p is a common choice when available. Your device and connection speed may affect how smoothly high-resolution video plays. Choosing a lower resolution can reduce file size and buffering.
+        MP4 is a standard container that works on most devices and operating systems. You can play the file in built-in players, VLC, or other software. 1080p looks good on TVs and monitors and is widely supported.
       </p>
 
       <h3 className="text-xl font-semibold mt-6 mb-3">Related Tools</h3>
@@ -142,12 +137,12 @@ function PosterContent() {
         About the Thumbnail Downloader
       </h2>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        This tool lets you download the thumbnail image that appears for a YouTube video. You paste the video URL and choose a size; the tool returns the image file. No video or audio is downloaded—only the still image used as the video’s preview.
+        This tool lets you download the thumbnail image that appears for a YouTube video. You paste the video URL and get the image in the best available resolution (up to 1280×720). No video or audio is downloaded—only the still image used as the video’s preview.
       </p>
 
-      <h3 className="text-xl font-semibold mt-6 mb-3">Thumbnail Sizes</h3>
+      <h3 className="text-xl font-semibold mt-6 mb-3">Thumbnail Quality</h3>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        YouTube serves thumbnails in several sizes: default (120×90), medium (320×180), high (480×360), standard (640×480), and maximum resolution (e.g. 1280×720 or higher when available). Not every video has a maximum-resolution thumbnail; the tool shows the options that exist for the URL you enter.
+        The tool downloads the highest-quality thumbnail available for the video (typically up to 1280×720). No size selection is required—you paste the URL and download the image.
       </p>
 
       <h3 className="text-xl font-semibold mt-6 mb-3">Typical Use Cases</h3>
@@ -175,17 +170,12 @@ function ShortsContent() {
         About the Shorts Downloader
       </h2>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        This tool lets you download a YouTube Shorts video as an MP4 file. Shorts are vertical, short-form videos on YouTube. You paste the Shorts URL, choose a resolution if available, and download the resulting file for personal use.
+        This tool lets you download a YouTube Shorts video as an MP4 file. Shorts are vertical, short-form videos on YouTube. You paste the Shorts URL and download the file in 1080p for personal use.
       </p>
 
       <h3 className="text-xl font-semibold mt-6 mb-3">Shorts Format</h3>
       <p className="text-muted-foreground leading-relaxed mb-4">
         Shorts are designed for vertical viewing (e.g. 9:16 aspect ratio) and are typically under sixty seconds. The downloaded file keeps that aspect ratio so it displays correctly on phones and vertical screens. You can still play it on a computer; it will appear with letterboxing or pillarboxing depending on the player.
-      </p>
-
-      <h3 className="text-xl font-semibold mt-6 mb-3">Resolution Availability</h3>
-      <p className="text-muted-foreground leading-relaxed mb-4">
-        The resolutions offered depend on what YouTube provides for that Short. Common options include 360p, 480p, and 720p. Not every Short has every resolution; the tool lists what is available after you enter the URL. Higher resolution means better clarity but larger file size.
       </p>
 
       <h3 className="text-xl font-semibold mt-6 mb-3">Aspect Ratio</h3>
@@ -213,22 +203,17 @@ function Content4K() {
         About the 4K Video Downloader
       </h2>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        This tool lets you download a YouTube video in 4K (Ultra HD) when the source offers that resolution. You paste the video URL and select 2160p (4K) if it appears in the list. The output is an MP4 file suitable for large screens and high-resolution displays.
+        4K (Ultra HD) download for YouTube videos is coming soon. This page is kept for reference and SEO. For now, use the <Link href="/mp4" className="text-primary underline underline-offset-2 hover:no-underline">MP4 downloader</Link> to get videos in 1080p (Full HD).
       </p>
 
-      <h3 className="text-xl font-semibold mt-6 mb-3">4K Limitations</h3>
+      <h3 className="text-xl font-semibold mt-6 mb-3">Coming Soon</h3>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        Not every YouTube video is available in 4K. The uploader must have published a 4K version, and YouTube must serve it for that video. If 2160p does not appear in the options, the video does not have 4K available; you can still choose the highest resolution listed (e.g. 1080p or 1440p). Regional or technical restrictions can also affect availability.
+        When 4K support is available, you will be able to download YouTube videos in 2160p (4K) when the source offers that resolution. Not every video is available in 4K; it depends on what the uploader and YouTube provide.
       </p>
 
-      <h3 className="text-xl font-semibold mt-6 mb-3">Device and Storage Requirements</h3>
+      <h3 className="text-xl font-semibold mt-6 mb-3">Until Then</h3>
       <p className="text-muted-foreground leading-relaxed mb-4">
-        4K files are large. A few minutes of video can be hundreds of megabytes or more. Ensure you have enough free space and a stable connection. Playback of 4K content also requires a device and screen that support that resolution; otherwise you may not see a visible improvement over 1080p.
-      </p>
-
-      <h3 className="text-xl font-semibold mt-6 mb-3">File Sizes</h3>
-      <p className="text-muted-foreground leading-relaxed mb-4">
-        File size depends on resolution, frame rate, and length. 4K (2160p) produces significantly larger files than 1080p or 720p. If you need smaller files or faster downloads, choose a lower resolution. The tool shows all available resolutions so you can pick what fits your needs.
+        4K files are large and require more storage and bandwidth. For most use cases, 1080p (Full HD) from the MP4 downloader is sufficient. Use the link above to download in 1080p.
       </p>
 
       <h3 className="text-xl font-semibold mt-6 mb-3">Personal Use and Compliance</h3>

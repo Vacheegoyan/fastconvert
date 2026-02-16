@@ -20,7 +20,7 @@ export default function MP4Page() {
         url={canonicalUrl('/mp4')}
       />
       <BreadcrumbJsonLd items={[{ name: 'Home', path: '/' }, { name: 'MP4 Converter', path: '/mp4' }]} />
-      <Converter defaultQuality="720p" showQualitySelector={true} mode="mp4" />
+      <Converter mode="mp4" />
       <SeoContent slug="mp4" />
     </>
   );

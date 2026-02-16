@@ -101,7 +101,7 @@ export default function StatisticsSection({ mode = 'mixed' }: { mode?: 'mp3' | '
     {
       icon: Music,
       title: 'High Quality Audio',
-      description: 'Extract crystal-clear MP3 audio from any YouTube video with multiple bitrate options up to 320 kbps.',
+      description: 'Extract crystal-clear MP3 audio from any YouTube video at 320 kbps.',
       color: 'text-pink-500',
       delay: 0,
     },
@@ -145,7 +145,7 @@ export default function StatisticsSection({ mode = 'mixed' }: { mode?: 'mp3' | '
     {
       icon: ImageIcon,
       title: 'High Resolution',
-      description: 'Download thumbnails in multiple sizes from 120x90 to 1280x720+ pixels.',
+      description: 'Download thumbnails in best available resolution (up to 1280×720).',
       color: 'text-indigo-500',
       delay: 0,
     },
@@ -167,7 +167,7 @@ export default function StatisticsSection({ mode = 'mixed' }: { mode?: 'mp3' | '
     {
       icon: Download,
       title: 'All Formats',
-      description: 'Download videos as MP4 or extract audio as MP3. Multiple quality options available.',
+      description: 'Download videos as MP4 (1080p) or extract audio as MP3 (320 kbps). Choose format and go.',
       color: 'text-blue-500',
       delay: 0,
     },

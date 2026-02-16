@@ -20,7 +20,7 @@ export default function PosterPage() {
         url={canonicalUrl('/poster')}
       />
       <BreadcrumbJsonLd items={[{ name: 'Home', path: '/' }, { name: 'Thumbnail Downloader', path: '/poster' }]} />
-      <Converter defaultQuality="poster-maxresdefault" showQualitySelector={true} mode="poster" />
+      <Converter mode="poster" />
       <SeoContent slug="poster" />
     </>
   );
