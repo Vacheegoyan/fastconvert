@@ -1,0 +1,105 @@
+{
+  "downloads": [],
+  "sessions": [
+    {
+      "id": "session_1771510702956_e1mzkdo78",
+      "userId": "user_1770310613874_6xc5inmba",
+      "startTime": 1771510702956,
+      "pageViews": 3,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/2.4.37 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+      "pages": [
+        {
+          "path": "/",
+          "timestamp": 1771510703063
+        },
+        {
+          "path": "/mp3",
+          "timestamp": 1771510824976
+        }
+      ],
+      "endTime": 1771510826072,
+      "duration": 123
+    },
+    {
+      "id": "session_1771510829656_m0kqilewm",
+      "userId": "user_1770310613874_6xc5inmba",
+      "startTime": 1771510829656,
+      "pageViews": 4,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/2.4.37 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+      "pages": [
+        {
+          "path": "/mp3",
+          "timestamp": 1771510829792
+        },
+        {
+          "path": "/4k",
+          "timestamp": 1771510836722
+        },
+        {
+          "path": "/shorts",
+          "timestamp": 1771510846405
+        }
+      ],
+      "endTime": 1771510850587,
+      "duration": 20
+    },
+    {
+      "id": "session_1771510854655_ito1r4j9e",
+      "userId": "user_1770310613874_6xc5inmba",
+      "startTime": 1771510854655,
+      "pageViews": 2,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/2.4.37 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+      "pages": [
+        {
+          "path": "/shorts",
+          "timestamp": 1771510854761
+        }
+      ],
+      "endTime": 1771510878574,
+      "duration": 23
+    },
+    {
+      "id": "session_1771510880956_87r9zxb1u",
+      "userId": "user_1770310613874_6xc5inmba",
+      "startTime": 1771510880956,
+      "pageViews": 2,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/2.4.37 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+      "pages": [
+        {
+          "path": "/shorts",
+          "timestamp": 1771510881045
+        }
+      ]
+    }
+  ],
+  "visits": [
+    {
+      "id": "visit_1771510702912_6so38smbq",
+      "userId": "user_1770310613874_6xc5inmba",
+      "timestamp": 1771510702912,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/2.4.37 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+      "referrer": "http://localhost:3000/"
+    },
+    {
+      "id": "visit_1771510829728_z2rimpk3k",
+      "userId": "user_1770310613874_6xc5inmba",
+      "timestamp": 1771510829728,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/2.4.37 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+      "referrer": "http://localhost:3000/mp3"
+    },
+    {
+      "id": "visit_1771510854691_zodywol9p",
+      "userId": "user_1770310613874_6xc5inmba",
+      "timestamp": 1771510854691,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/2.4.37 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+      "referrer": "http://localhost:3000/shorts"
+    },
+    {
+      "id": "visit_1771510880924_mmececnnf",
+      "userId": "user_1770310613874_6xc5inmba",
+      "timestamp": 1771510880924,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/2.4.37 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+      "referrer": "http://localhost:3000/shorts"
+    }
+  ]
+}

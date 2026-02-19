@@ -12,6 +12,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
 
+/** Adblock warning is temporarily disabled. Set to true to re-enable. */
+const ADBLOCK_FEATURE_ENABLED = false;
+
 export default function AdblockWarning() {
   const { isAdblockDetected, isChecking, isEnabled } = useAdblockDetector();
   const [isOpen, setIsOpen] = useState(false);
@@ -63,6 +66,11 @@ export default function AdblockWarning() {
   const handleRefresh = () => {
     window.location.reload();
   };
+
+  // Adblock feature is temporarily disabled — modal never shows
+  if (!ADBLOCK_FEATURE_ENABLED) {
+    return null;
+  }
 
   // Adblock detection is disabled in development; only active when deployed with a real domain
   if (isEnabled === false) {
