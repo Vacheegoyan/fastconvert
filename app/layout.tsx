@@ -59,11 +59,15 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${robotoMono.variable}`}>
       <body className={`font-sans antialiased flex flex-col min-h-screen`} suppressHydrationWarning>
         <Header />
+        <AdUnit unitId="2428400" placement="top" showAdvertiseLink />
         <main className="flex-1">
           {children}
+          <AdUnit unitId="2428406" placement="middle" />
+          <AdUnit unitId="2428408" placement="middle" />
+          <AdUnit unitId="2428409" placement="middle" />
           <FaqSection />
         </main>
-        <AdUnit />
+        <AdUnit unitId="2428400" placement="bottom" showAdvertiseLink />
         <Footer />
         <AdblockWarning />
         <AnalyticsProvider />
