@@ -72,9 +72,27 @@ class YouTubeDownloader:
         
         return filename if filename else 'video'
 
+    def _get_base_ydl_opts(self):
+        """Base options for YouTube: cookies, extractor (web client), Node.js for signature solving."""
+        base = {}
+        # Cookies (Netscape format) — bot check / sign-in bypass
+        cookies_path = os.path.join(os.path.dirname(__file__), "cookies.txt")
+        if os.path.isfile(cookies_path):
+            base['cookiefile'] = cookies_path
+        # YouTube: use web client so cookies are applied; default fallback
+        base['extractor_args'] = {'youtube': {'player_client': ['web', 'default']}}
+        # JS runtime for signature solving (Node 20+); yt-dlp finds node in PATH
+        node_path = shutil.which('node')
+        if node_path:
+            base['js_runtimes'] = f'node:{node_path}'
+        else:
+            base['js_runtimes'] = 'node'
+        return base
+
     def get_video_info(self, url):
         """Ստանում է տեսանյութի մասին տեղեկություն"""
         ydl_opts = {
+            **self._get_base_ydl_opts(),
             'quiet': True, 
             'no_warnings': True, 
             'noplaylist': True,
@@ -124,6 +142,7 @@ class YouTubeDownloader:
     def get_playlist_info(self, url):
         """Ստանում է պլեյլիստի տեղեկություն"""
         ydl_opts = {
+            **self._get_base_ydl_opts(),
             'quiet': True,
             'no_warnings': True,
             'extract_flat': True,
@@ -222,6 +241,7 @@ class YouTubeDownloader:
         expected_title = self.sanitize_filename(original_title)
         # Force output template with sanitized title so we can rename to .mp3 after
         ydl_opts = {
+            **self._get_base_ydl_opts(),
             'format': 'bestaudio/best',
             'outtmpl': os.path.join(temp_dir, f"{expected_title}.%(ext)s"),
             'quiet': True,
@@ -327,6 +347,7 @@ class YouTubeDownloader:
             temp_dir = self.downloads_dir['temp']
         
         ydl_opts = {
+            **self._get_base_ydl_opts(),
             'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
             'quiet': True,
             'no_warnings': True,
@@ -501,6 +522,7 @@ class YouTubeDownloader:
             temp_dir = self.downloads_dir['temp']
         
         ydl_opts = {
+            **self._get_base_ydl_opts(),
             'format': 'best[ext=mp4]/best',
             'outtmpl': os.path.join(temp_dir, '%(title)s.%(ext)s'),
             'quiet': True,

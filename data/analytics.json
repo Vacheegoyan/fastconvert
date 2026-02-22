@@ -1,5 +1,22 @@
 {
-  "downloads": [],
+  "downloads": [
+    {
+      "id": "dl_1771518628034_c3n8vlsqq",
+      "timestamp": 1771518628034,
+      "format": "mp3-320",
+      "quality": "mp3-320",
+      "videoId": "j3q0wzWyPqc",
+      "userId": "user_ydizaj"
+    },
+    {
+      "id": "dl_1771519016031_7msxjyy01",
+      "timestamp": 1771519016031,
+      "format": "mp3-320",
+      "quality": "mp3-320",
+      "videoId": "j3q0wzWyPqc",
+      "userId": "user_ydizaj"
+    }
+  ],
   "sessions": [
     {
       "id": "session_1771510702956_e1mzkdo78",
@@ -70,6 +87,34 @@
           "timestamp": 1771510881045
         }
       ]
+    },
+    {
+      "id": "session_1771518475977_mpz2avflv",
+      "userId": "user_1770310613874_6xc5inmba",
+      "startTime": 1771518475977,
+      "pageViews": 2,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/2.4.37 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+      "pages": [
+        {
+          "path": "/",
+          "timestamp": 1771518476143
+        }
+      ]
+    },
+    {
+      "id": "session_1771518566564_xyo00ecjr",
+      "userId": "user_1770310655163_7n1t5hmob",
+      "startTime": 1771518566564,
+      "pageViews": 2,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+      "pages": [
+        {
+          "path": "/",
+          "timestamp": 1771518566766
+        }
+      ],
+      "endTime": 1771530741624,
+      "duration": 12175
     }
   ],
   "visits": [
@@ -100,6 +145,20 @@
       "timestamp": 1771510880924,
       "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/2.4.37 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
       "referrer": "http://localhost:3000/shorts"
+    },
+    {
+      "id": "visit_1771518476020_p4gtpufi1",
+      "userId": "user_1770310613874_6xc5inmba",
+      "timestamp": 1771518476020,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Cursor/2.4.37 Chrome/142.0.7444.235 Electron/39.2.7 Safari/537.36",
+      "referrer": "http://localhost:3000/"
+    },
+    {
+      "id": "visit_1771518566480_2m4105rqy",
+      "userId": "user_1770310655163_7n1t5hmob",
+      "timestamp": 1771518566480,
+      "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36",
+      "referrer": "http://localhost:3000/"
     }
   ]
 }
