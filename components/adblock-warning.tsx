@@ -31,26 +31,30 @@ export default function AdblockWarning() {
     };
   }, []);
 
-  // Show dialog when adblock is detected and block body scroll (only after 1 minute)
+  // When feature is disabled, never lock body; always restore styles
   useEffect(() => {
+    if (!ADBLOCK_FEATURE_ENABLED) {
+      document.body.style.overflow = '';
+      document.body.style.pointerEvents = '';
+      return () => {
+        document.body.style.overflow = '';
+        document.body.style.pointerEvents = '';
+      };
+    }
     if (!isChecking && isAdblockDetected && canShowWarning) {
       setIsOpen(true);
-      // Block body scroll and pointer events
       document.body.style.overflow = 'hidden';
       document.body.style.pointerEvents = 'none';
     } else if (!isChecking && !isAdblockDetected) {
       setIsOpen(false);
-      // Restore body scroll and pointer events
       document.body.style.overflow = '';
       document.body.style.pointerEvents = '';
     }
-
-    // Cleanup on unmount
     return () => {
       document.body.style.overflow = '';
       document.body.style.pointerEvents = '';
     };
-  }, [isAdblockDetected, isChecking, canShowWarning]);
+  }, [ADBLOCK_FEATURE_ENABLED, isAdblockDetected, isChecking, canShowWarning]);
 
   // Prevent closing the dialog
   const handleOpenChange = (open: boolean) => {

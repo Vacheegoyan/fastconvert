@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { Inter, Roboto_Mono } from 'next/font/google'
 import Header from '@/components/header'
 import FaqSection from '@/components/faq-section'
+import AdUnit from '@/components/ad-unit'
 import Footer from '@/components/footer'
 import AdblockWarning from '@/components/adblock-warning'
 import AnalyticsProvider from '@/components/analytics-provider'
@@ -62,6 +63,7 @@ export default function RootLayout({
           {children}
           <FaqSection />
         </main>
+        <AdUnit />
         <Footer />
         <AdblockWarning />
         <AnalyticsProvider />
